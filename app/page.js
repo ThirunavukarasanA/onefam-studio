@@ -1,12 +1,13 @@
 import HeroSection from "@/components/HeroSection";
+import AboutSection from "@/components/HomeComponents/AboutSection";
 import Navbar from "@/components/Navbar";
-import Image from "next/image";
 
 export default function Home() {
   return (
     <>
       <Navbar />
       <HeroSection />
+      <AboutSection />
     </>
   );
 }

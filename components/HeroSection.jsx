@@ -22,15 +22,6 @@ export default function HeroSection() {
   return (
     <div className="relative top-0">
       <div className="w-screen h-screen overflow-hidden">
-        {/* <video
-          src="/assets/videos/ONE_FAM_MEDIA_HUB.mp4"
-          autoPlay
-          muted
-          playsInline
-          preload="metadata"
-          poster={Poster}
-          className="w-full h-full object-cover"
-        /> */}
         <video
           autoPlay
           muted
