@@ -5,8 +5,8 @@ import Logo from "@/public/assets/images/logos/onefam_media_hub_logo.svg";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 const Container = ({ children, className = "" }) => (
   <div
     className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 overflow-hidden ${className}`}
@@ -15,6 +15,7 @@ const Container = ({ children, className = "" }) => (
   </div>
 );
 export default function Navbar() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -28,11 +29,12 @@ export default function Navbar() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
   const links = [
-    ["#services", "Services"],
-    ["#process", "Process"],
-    ["#lookbook", "Lookbook"],
-    ["#testimonials", "Reviews"],
-    ["#contact", "Contact"],
+    ["/", "Home"],
+    ["/services", "Services"],
+    ["/process", "Process"],
+    ["/lookbook", "Lookbook"],
+    ["/testimonials", "Reviews"],
+    ["/contact", "Contact"],
   ];
   const btnPrimary =
     "inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-pink-600 to-amber-500 px-6 py-3 text-white font-semibold shadow transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500";
@@ -53,7 +55,7 @@ export default function Navbar() {
           >
             <Container className="flex items-center justify-between py-3">
               {/* Logo */}
-              <a href="#home" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <div className="leading-tight">
                   <div>
                     <Image
@@ -63,22 +65,24 @@ export default function Navbar() {
                     />
                   </div>
                 </div>
-              </a>
+              </Link>
 
               {/* Desktop nav */}
               <nav className="hidden lg:flex items-center gap-8 text-sm font-medium">
-                {links.map(([href, label]) => (
-                  <a
-                    key={href}
-                    href={href}
-                    className="uppercase text-white hover:text-primary"
-                  >
-                    {label}
-                  </a>
-                ))}
-                {/* <a href="#contact" className={btnTiny}>
-                Shop Now <ArrowRight className="h-4 w-4" />
-              </a> */}
+                {links.map(([href, label]) => {
+                  const isActive = pathname === href;
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`uppercase transition-colors hover:text-primary ${
+                        isActive ? "text-primary font-bold" : "text-white"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
               </nav>
 
               {/* Mobile hamburger */}
@@ -132,32 +136,37 @@ export default function Navbar() {
                     </div>
 
                     <nav className="space-y-4">
-                      {links.map(([href, label]) => (
-                        <a
-                          key={href}
-                          href={href}
-                          onClick={() => setOpen(false)}
-                          className="block uppercase font-semibold py-2 border-b border-zinc-200/60 text-white hover:text-primary "
-                        >
-                          {label}
-                        </a>
-                      ))}
+                      {links.map(([href, label]) => {
+                        const isActive = pathname === href;
+                        return (
+                          <Link
+                            key={href}
+                            href={href}
+                            onClick={() => setOpen(false)}
+                            className={`block uppercase font-semibold py-2 border-b border-zinc-200/60 transition-colors hover:text-primary ${
+                              isActive ? "text-primary" : "text-white"
+                            }`}
+                          >
+                            {label}
+                          </Link>
+                        );
+                      })}
 
                       <div className="mt-6 space-y-3">
-                        <a
-                          href="#contact"
+                        <Link
+                          href="/contact"
                           onClick={() => setOpen(false)}
                           className={`${btnPrimary} w-full justify-center`}
                         >
                           Shop Now
-                        </a>
-                        <a
-                          href="#lookbook"
+                        </Link>
+                        <Link
+                          href="/#lookbook"
                           onClick={() => setOpen(false)}
                           className={`${btnGhost} w-full justify-center`}
                         >
                           View Lookbook
-                        </a>
+                        </Link>
                       </div>
                     </nav>
                   </Dialog.Panel>
