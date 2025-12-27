@@ -20,8 +20,8 @@ export default function HeroSection() {
   console.log("scrollPosition :", scrollPosition);
   const webm = "/assets/videos/ONE_FAM_MEDIA_HUB.webm";
   return (
-    <div className="relative top-0">
-      <div className="w-screen h-screen overflow-hidden">
+    <div className="relative top-0 overflow-hidden">
+      <div className="w-full h-screen overflow-hidden">
         <video
           autoPlay
           muted
