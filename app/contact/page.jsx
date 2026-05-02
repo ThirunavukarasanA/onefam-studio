@@ -117,7 +117,7 @@ export default function ContactPage() {
             className="text-gray-400 max-w-2xl mx-auto text-lg font-light"
           >
             Whether you have a question, a project in mind, or just want to say
-            hello, we'd love to hear from you.
+            hello, we&apos;d love to hear from you.
           </motion.p>
         </div>
 
