@@ -10,6 +10,7 @@ This file is the working guide for AI agents and developers contributing to this
 - **Animation:** Framer Motion
 - **Accessible UI primitives:** Headless UI
 - **Icons:** `lucide-react`
+- **Database:** MongoDB through Mongoose
 - **Images/media:** `next/image` plus static assets from `public/assets`
 
 The homepage currently renders:
@@ -40,6 +41,7 @@ Run `npm run lint` before handing off code changes. Run `npm run build` when tou
 
 ```text
 app/
+  api/contact/route.js Contact form API endpoint
   globals.css          Global Tailwind import and theme tokens
   layout.js            Root metadata, fonts, navbar/footer shell
   page.js              Homepage composition
@@ -52,9 +54,17 @@ components/
   Navbar.jsx
   HeroSection.jsx
   Footer.jsx
+  ContactComponents/
+    ContactPage.jsx
   HomeComponents/
     AboutSection.jsx
     ClientsSection.jsx
+
+lib/
+  mongodb.js           Cached Mongoose connection helper
+
+models/
+  ContactMessage.js    Contact form submission schema
 
 public/assets/
   images/
@@ -101,6 +111,7 @@ public/assets/
 ## Current Routes
 
 - `/` exists and renders the homepage.
+- `/api/contact` accepts contact form submissions and saves them to MongoDB.
 - `/services` exists and renders the services page.
 - `/lookbook` exists and renders the lookbook page.
 - `/contact` exists and renders the contact page.
@@ -145,6 +156,19 @@ When adding these pages, create matching folders under `app/`, for example `app/
 - Avoid adding new dependencies unless they solve a clear project need.
 - Do not commit build output, `.next`, or generated assets unless explicitly requested.
 - Preserve user-added assets in `public/assets`.
+
+## Contact Form Backend
+
+- The contact page UI lives in `components/ContactComponents/ContactPage.jsx`.
+- Form submissions post to `app/api/contact/route.js`.
+- MongoDB connection uses `lib/mongodb.js` and expects `MONGO_URI` in `.env`.
+- Saved submissions use the `models/ContactMessage.js` Mongoose model.
+- Validation is enforced on both client and server:
+  - name: alphabets and spaces only
+  - email: valid email format
+  - phone: numbers only
+  - subject: alphabets, numbers, and spaces only
+  - message: optional; alphabets, numbers, and spaces only when provided
 
 ## Suggested Next Improvements
 

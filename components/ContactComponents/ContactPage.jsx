@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
@@ -44,7 +44,136 @@ const wordVariants = {
   },
 };
 
+const initialFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  subject: "",
+  message: "",
+};
+
+const fieldPatterns = {
+  name: /^[A-Za-z ]+$/,
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  phone: /^[0-9]+$/,
+  subject: /^[A-Za-z0-9 ]+$/,
+  message: /^[A-Za-z0-9 ]*$/,
+};
+
+function sanitizeField(name, value) {
+  if (name === "name") return value.replace(/[^A-Za-z ]/g, "");
+  if (name === "phone") return value.replace(/[^0-9]/g, "");
+  if (name === "subject" || name === "message") {
+    return value.replace(/[^A-Za-z0-9 ]/g, "");
+  }
+  return value;
+}
+
+function validateForm(data) {
+  const errors = {};
+  const values = {
+    name: data.name.trim(),
+    email: data.email.trim(),
+    phone: data.phone.trim(),
+    subject: data.subject.trim(),
+    message: data.message.trim(),
+  };
+
+  if (!values.name) {
+    errors.name = "Name is required.";
+  } else if (!fieldPatterns.name.test(values.name)) {
+    errors.name = "Name can contain alphabets and spaces only.";
+  }
+
+  if (!values.email) {
+    errors.email = "Email is required.";
+  } else if (!fieldPatterns.email.test(values.email)) {
+    errors.email = "Enter a valid email address.";
+  }
+
+  if (!values.phone) {
+    errors.phone = "Phone number is required.";
+  } else if (!fieldPatterns.phone.test(values.phone)) {
+    errors.phone = "Phone number can contain numbers only.";
+  }
+
+  if (!values.subject) {
+    errors.subject = "Subject is required.";
+  } else if (!fieldPatterns.subject.test(values.subject)) {
+    errors.subject = "Subject can contain alphabets, numbers, and spaces only.";
+  }
+
+  if (values.message && !fieldPatterns.message.test(values.message)) {
+    errors.message = "Message can contain alphabets, numbers, and spaces only.";
+  }
+
+  return errors;
+}
+
 export default function ContactPage() {
+  const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    const sanitizedValue = sanitizeField(name, value);
+
+    setFormData((current) => ({ ...current, [name]: sanitizedValue }));
+    setErrors((current) => ({ ...current, [name]: "" }));
+    setStatus({ type: "", message: "" });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const validationErrors = validateForm(formData);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setStatus({
+        type: "error",
+        message: "Please fix the highlighted fields before submitting.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        setErrors(result.errors || {});
+        setStatus({
+          type: "error",
+          message: result.message || "Unable to send your message.",
+        });
+        return;
+      }
+
+      setFormData(initialFormData);
+      setStatus({
+        type: "success",
+        message: "Thank you. Your message has been saved successfully.",
+      });
+    } catch {
+      setStatus({
+        type: "error",
+        message: "Network error. Please try again in a moment.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="bg-black min-h-screen text-white pt-24 pb-20 relative overflow-hidden">
       {/* Background Gradients */}
@@ -192,41 +321,89 @@ export default function ContactPage() {
             <h3 className="text-2xl font-bold text-white mb-6">
               Send a Message
             </h3>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputGroup label="Name" placeholder="John Doe" type="text" />
+                <InputGroup
+                  label="Name"
+                  name="name"
+                  placeholder="John Doe"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  error={errors.name}
+                  required
+                />
                 <InputGroup
                   label="Email"
+                  name="email"
                   placeholder="john@example.com"
                   type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={errors.email}
+                  required
                 />
               </div>
               <InputGroup
                 label="Phone"
-                placeholder="+91 98765 43210"
+                name="phone"
+                placeholder="9876543210"
                 type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                error={errors.phone}
+                inputMode="numeric"
+                required
               />
               <InputGroup
                 label="Subject"
+                name="subject"
                 placeholder="Project Inquiry"
                 type="text"
+                value={formData.subject}
+                onChange={handleChange}
+                error={errors.subject}
+                required
               />
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Message
+                  Message <span className="text-gray-600">(optional)</span>
                 </label>
                 <textarea
+                  name="message"
                   rows="4"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none"
+                  value={formData.message}
+                  onChange={handleChange}
+                  className={`w-full bg-black/40 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-1 transition-all resize-none ${
+                    errors.message
+                      ? "border-red-500/70 focus:border-red-500 focus:ring-red-500/50"
+                      : "border-white/10 focus:border-primary/50 focus:ring-primary/50"
+                  }`}
                   placeholder="Tell us about your project..."
                 ></textarea>
+                {errors.message ? (
+                  <p className="mt-2 text-xs text-red-400">{errors.message}</p>
+                ) : null}
               </div>
+
+              {status.message ? (
+                <p
+                  className={`rounded-xl border px-4 py-3 text-sm ${
+                    status.type === "success"
+                      ? "border-green-500/30 bg-green-500/10 text-green-300"
+                      : "border-red-500/30 bg-red-500/10 text-red-300"
+                  }`}
+                >
+                  {status.message}
+                </p>
+              ) : null}
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 hover:opacity-90 active:scale-[0.98] transition-all duration-300 shadow-lg shadow-primary/25"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 hover:opacity-90 active:scale-[0.98] transition-all duration-300 shadow-lg shadow-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <span>Send Message</span>
+                <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
                 <Send size={18} />
               </button>
             </form>
@@ -257,17 +434,37 @@ function ContactCard({ icon, title, content, href }) {
   );
 }
 
-function InputGroup({ label, placeholder, type }) {
+function InputGroup({
+  label,
+  name,
+  placeholder,
+  type,
+  value,
+  onChange,
+  error,
+  inputMode,
+  required = false,
+}) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-400 mb-2">
         {label}
       </label>
       <input
+        name={name}
         type={type}
-        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
+        value={value}
+        onChange={onChange}
+        inputMode={inputMode}
+        required={required}
+        className={`w-full bg-black/40 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-1 transition-all ${
+          error
+            ? "border-red-500/70 focus:border-red-500 focus:ring-red-500/50"
+            : "border-white/10 focus:border-primary/50 focus:ring-primary/50"
+        }`}
         placeholder={placeholder}
       />
+      {error ? <p className="mt-2 text-xs text-red-400">{error}</p> : null}
     </div>
   );
 }
