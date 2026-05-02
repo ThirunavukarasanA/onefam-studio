@@ -44,7 +44,9 @@ app/
   layout.js            Root metadata, fonts, navbar/footer shell
   page.js              Homepage composition
   contact/page.jsx     Contact page
+  lookbook/page.jsx    Lookbook page
   services/page.jsx    Services page
+  testimonials/page.jsx Testimonials page
 
 components/
   Navbar.jsx
@@ -100,11 +102,11 @@ public/assets/
 
 - `/` exists and renders the homepage.
 - `/services` exists and renders the services page.
+- `/lookbook` exists and renders the lookbook page.
 - `/contact` exists and renders the contact page.
+- `/testimonials` exists and renders the testimonials page.
 - Navbar currently links to routes that are not present yet:
   - `/process`
-  - `/lookbook`
-  - `/testimonials`
 
 When adding these pages, create matching folders under `app/`, for example `app/services/page.jsx`.
 

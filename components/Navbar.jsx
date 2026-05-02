@@ -31,7 +31,6 @@ export default function Navbar() {
   const links = [
     ["/", "Home"],
     ["/services", "Services"],
-    ["/process", "Process"],
     ["/lookbook", "Lookbook"],
     ["/testimonials", "Reviews"],
     ["/contact", "Contact"],
